@@ -10,7 +10,8 @@ var completedBtn = document.querySelector("#completed-btn");
 var emptymsg = document.querySelector("#empty-message");
 var themebtn = document.querySelector("#theme-btn");
 var priority = document.querySelector("#task-priority");
-
+var deadline = document.querySelector("#task-deadline");
+var searchinput = document.querySelector("#search-input");
 var  tasknumber = 0;
 var completednumber = 0;
 var tasks = [];
@@ -21,9 +22,22 @@ function createtask(task){
        var deletebtn = document.createElement("button");
        var completebtn = document.createElement("button");
        var editbtn = document.createElement("button");
+       var actionsbox = document.createElement("div");
+       var togglebtn = document.createElement("button");
+
+       actionsbox.classList.add("task-actions");
+       togglebtn.classList.add("toggle-actions");
+
+       togglebtn.textContent = "⋮";
+       togglebtn.type = "button";
+
+       actionsbox.style.display = "none";
        var editbox = document.createElement("span");
        var editinput = null;
        var prioritybox = document.createElement("span");
+       var deadlinebox = document.createElement("span");
+       deadlinebox.classList.add("deadline-box");
+
 
 
        editbtn.textContent = "🖋️";
@@ -31,6 +45,25 @@ function createtask(task){
        deletebtn.textContent = "🗑️";
        editbox.textContent = task.text;
        prioritybox.textContent = task.priority;
+if (task.deadline) {
+    var date = new Date(task.deadline);
+
+    var formattedDate = date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short"
+    });
+
+    var formattedTime = date.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+
+    deadlinebox.textContent = "📅 " + formattedDate + ", " + formattedTime;
+} else {
+    deadlinebox.textContent = "";
+}
+       
 
        if (task.completed){
         taskitem.classList.add("completed");
@@ -54,12 +87,26 @@ function createtask(task){
          else if (task.priority === "low") {
            prioritybox.textContent = "🟢";
         }
+        taskitem.appendChild(deadlinebox);
 
-       taskitem.appendChild(editbtn);
+       actionsbox.appendChild(editbtn);
    
-       taskitem.appendChild(completebtn);
-       taskitem.appendChild(deletebtn);
+       actionsbox.appendChild(completebtn);
+       actionsbox.appendChild(deletebtn);
+
+       taskitem.appendChild(togglebtn);
+       taskitem.appendChild(actionsbox);
       
+
+       togglebtn.addEventListener("click", function(){
+        if (actionsbox.style.display === "none") {
+            actionsbox.style.display = "flex";
+            togglebtn.textContent = "×";
+        } else {
+            actionsbox.style.display = "none";
+            togglebtn.textContent = "⋮";
+        }
+       });
 
 
         editbtn.addEventListener("click", function(){
@@ -136,24 +183,43 @@ function createtask(task){
        tasknumber++;
        updatetaskcount();
     }
-    function filtertasks(filter){
-        var alltasks = document.querySelectorAll("#task-list p:not(#empty-message)");
+ function filtertasks(filter) {
+    var alltasks = document.querySelectorAll(
+        "#task-list p:not(#empty-message)"
+    );
 
-        alltasks.forEach(function(taskitem){
-            taskitem.style.display = "flex";
-           var completed = taskitem.classList.contains("completed");
+    var searchtext = searchinput.value.toLowerCase().trim();
 
-           if (filter === "all") {
+    alltasks.forEach(function(taskitem) {
+        var tasktext = taskitem.dataset.task.toLowerCase();
+        var completed = taskitem.classList.contains("completed");
+
+        var matchesSearch = tasktext.includes(searchtext);
+
+        var matchesFilter =
+            filter === "all" ||
+            (filter === "active" && !completed) ||
+            (filter === "completed" && completed);
+
+        if (matchesSearch && matchesFilter) {
             taskitem.style.display = "flex";
-           }
-           if (filter === "active" && completed) {
+        } else {
             taskitem.style.display = "none";
-           }
-           if (filter === "completed" && !completed){
-            taskitem.style.display = "none";
-           }
-        })
+        }
+    });
+    
+}
+searchinput.addEventListener("input", function() {
+    var activefilter = "all";
+
+    if (activebtn.classList.contains("active-filter")) {
+        activefilter = "active";
+    } else if (completedBtn.classList.contains("active-filter")) {
+        activefilter = "completed";
     }
+
+    filtertasks(activefilter);
+});
 allbtn.addEventListener("click", function(){
     filtertasks("all");
 
@@ -196,7 +262,8 @@ addtaskbtn.addEventListener("click", function() {
     var task = {
       text: tasktext,
       completed: false,
-      priority: priority.value
+      priority: priority.value,
+      deadline: deadline.value
       
 };
    

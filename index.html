@@ -25,6 +25,7 @@
                      <option value="medium">🟡 Medium</option>
                      <option value="low">🟢 Low</option>
                      </select>
+                     <input id="task-deadline" type="datetime-local">
                     
                      <button id="add-task-btn"> Add Task </button>
                      <button id="clear-all-btn"> Clear All</button>
@@ -34,7 +35,17 @@
                          <button id="completed-btn">Completed</button>
                          </div>
 
-                        
+                    
+                        <div class="search-container">
+                        <input
+                          type="search"
+                          id="search-input"
+                          placeholder="🔍 Search your tasks..."
+                          aria-label="Search tasks"
+                           >
+                        </div>
+
+
 
                      <div id="task-list">
                         <p id="empty-message">📝 No tasks yet. Add your first to get started. </p>
